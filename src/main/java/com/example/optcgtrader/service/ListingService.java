@@ -1,9 +1,7 @@
 package com.example.optcgtrader.service;
 
 import com.example.optcgtrader.dto.request.ListingRequestDTO;
-import com.example.optcgtrader.dto.response.CardSummaryDTO;
-import com.example.optcgtrader.dto.response.ListingResponseDTO;
-import com.example.optcgtrader.dto.response.UserSummaryDTO;
+import com.example.optcgtrader.dto.response.*;
 import com.example.optcgtrader.model.entity.Card;
 import com.example.optcgtrader.model.entity.Listing;
 import com.example.optcgtrader.model.entity.User;
@@ -23,20 +21,28 @@ public class ListingService {
     private final UserRepository userRepository;
     private final CardRepository cardRepository;
 
+    // =========================
+    // QUERIES
+    // =========================
+
     public List<ListingResponseDTO> getAll() {
         return listingRepository.findAll()
                 .stream()
-                .map(this::toResponseDTO)
+                .map(this::toDTO)
                 .toList();
     }
 
     public ListingResponseDTO getById(Long id) {
 
         Listing listing = listingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Publicación no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Listing no encontrado"));
 
-        return toResponseDTO(listing);
+        return toDTO(listing);
     }
+
+    // =========================
+    // CREATE
+    // =========================
 
     public ListingResponseDTO create(ListingRequestDTO dto) {
 
@@ -55,21 +61,27 @@ public class ListingService {
                 .card(card)
                 .build();
 
-        Listing saved = listingRepository.save(listing);
-
-        return toResponseDTO(saved);
+        return toDTO(listingRepository.save(listing));
     }
+
+    // =========================
+    // DELETE
+    // =========================
 
     public void delete(Long id) {
 
         if (!listingRepository.existsById(id)) {
-            throw new RuntimeException("Publicación no encontrada");
+            throw new RuntimeException("Listing no encontrado");
         }
 
         listingRepository.deleteById(id);
     }
 
-    private ListingResponseDTO toResponseDTO(Listing listing) {
+    // =========================
+    // MAPPERS
+    // =========================
+
+    private ListingResponseDTO toDTO(Listing listing) {
 
         return ListingResponseDTO.builder()
                 .id(listing.getId())
@@ -77,21 +89,32 @@ public class ListingService {
                 .stock(listing.getStock())
                 .condition(listing.getCondition())
                 .language(listing.getLanguage())
-                .seller(
-                        UserSummaryDTO.builder()
-                                .id(listing.getSeller().getId())
-                                .username(listing.getSeller().getUsername())
-                                .rating(listing.getSeller().getRating())
-                                .build()
-                )
-                .card(
-                        CardSummaryDTO.builder()
-                                .id(listing.getCard().getId())
-                                .name(listing.getCard().getName())
-                                .code(listing.getCard().getCode())
-                                .imageUrl(listing.getCard().getImageUrl())
-                                .build()
-                )
+
+                .seller(toSellerDTO(listing.getSeller()))
+                .card(toCardDTO(listing.getCard()))
+
                 .build();
     }
+
+    // SOLO INFO RESUMIDA DEL SELLER
+    private UserSummaryDTO toSellerDTO(User user) {
+
+        return UserSummaryDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .rating(user.getRating())
+                .build();
+    }
+
+    // CARD RESUMIDA PARA MARKETPLACE
+        private CardSummaryDTO toCardDTO(Card card) {
+
+        return CardSummaryDTO.builder()
+                    .id(card.getId())
+                    .name(card.getName())
+                    .code(card.getCode())
+                    .rarity(card.getRarity()) // 👈 ENUM directo
+                    .imageUrl(card.getImageUrl())
+                    .build();
+        }
 }

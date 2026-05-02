@@ -1,25 +1,37 @@
 package com.example.optcgtrader.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.optcgtrader.model.entity.User;
+import com.example.optcgtrader.dto.request.UserRequestDTO;
+import com.example.optcgtrader.dto.response.UserResponseDTO;
 import com.example.optcgtrader.service.UserService;
-
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-    
+
     private final UserService userService;
 
+    @GetMapping
+    public List<UserResponseDTO> getAll() {
+        return userService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public UserResponseDTO getById(@PathVariable Long id) {
+        return userService.getById(id);
+    }
+
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-        return userService.createUser(user);
+    public UserResponseDTO create(@RequestBody UserRequestDTO dto) {
+        return userService.create(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        userService.delete(id);
     }
 }
