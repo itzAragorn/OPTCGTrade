@@ -3,6 +3,8 @@ package com.example.optcgtrader.controller;
 import com.example.optcgtrader.dto.request.CardRequestDTO;
 import com.example.optcgtrader.dto.response.CardResponseDTO;
 import com.example.optcgtrader.service.CardService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +28,8 @@ public class CardController {
     }
 
     @PostMapping
-    public CardResponseDTO create(@RequestBody CardRequestDTO dto) {
+
+    public CardResponseDTO create(@Valid @RequestBody CardRequestDTO dto) {
         return cardService.create(dto);
     }
 

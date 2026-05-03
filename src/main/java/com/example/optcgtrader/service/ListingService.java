@@ -2,6 +2,7 @@ package com.example.optcgtrader.service;
 
 import com.example.optcgtrader.dto.request.ListingRequestDTO;
 import com.example.optcgtrader.dto.response.*;
+import com.example.optcgtrader.exception.ResourceNotFoundException;
 import com.example.optcgtrader.model.entity.Card;
 import com.example.optcgtrader.model.entity.Listing;
 import com.example.optcgtrader.model.entity.User;
@@ -28,7 +29,7 @@ public class ListingService {
     public List<ListingResponseDTO> getAll() {
         return listingRepository.findAll()
                 .stream()
-                .map(this::toDTO)
+                .map(this::mapToDTO)
                 .toList();
     }
 
@@ -37,7 +38,7 @@ public class ListingService {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Listing no encontrado"));
 
-        return toDTO(listing);
+        return mapToDTO(listing);
     }
 
     // =========================
@@ -61,7 +62,7 @@ public class ListingService {
                 .card(card)
                 .build();
 
-        return toDTO(listingRepository.save(listing));
+        return mapToDTO(listingRepository.save(listing));
     }
 
     // =========================
@@ -81,7 +82,7 @@ public class ListingService {
     // MAPPERS
     // =========================
 
-    private ListingResponseDTO toDTO(Listing listing) {
+    private ListingResponseDTO mapToDTO(Listing listing) {
 
         return ListingResponseDTO.builder()
                 .id(listing.getId())
@@ -117,4 +118,27 @@ public class ListingService {
                     .imageUrl(card.getImageUrl())
                     .build();
         }
+    public ListingResponseDTO update(Long id, ListingRequestDTO dto) {
+
+        Listing listing = listingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Listing no encontrado"));
+
+        User seller = userRepository.findById(dto.getSellerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        Card card = cardRepository.findById(dto.getCardId())
+                .orElseThrow(() -> new ResourceNotFoundException("Carta no encontrada"));
+
+        listing.setPrice(dto.getPrice());
+        listing.setStock(dto.getStock());
+        listing.setCondition(dto.getCondition());
+        listing.setLanguage(dto.getLanguage());
+
+        listing.setSeller(seller);
+        listing.setCard(card);
+
+        Listing updated = listingRepository.save(listing);
+
+        return mapToDTO(updated);
+}
 }

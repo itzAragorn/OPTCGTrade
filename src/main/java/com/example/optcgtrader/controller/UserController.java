@@ -3,6 +3,8 @@ package com.example.optcgtrader.controller;
 import com.example.optcgtrader.dto.request.UserRequestDTO;
 import com.example.optcgtrader.dto.response.UserResponseDTO;
 import com.example.optcgtrader.service.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +28,20 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDTO create(@RequestBody UserRequestDTO dto) {
+    public UserResponseDTO create(@Valid @RequestBody UserRequestDTO dto) {
         return userService.create(dto);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         userService.delete(id);
+    }
+
+    @PutMapping("/{id}")
+    public UserResponseDTO update(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRequestDTO dto
+    ) {
+        return userService.update(id, dto);
     }
 }

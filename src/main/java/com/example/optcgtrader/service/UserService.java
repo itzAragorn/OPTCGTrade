@@ -82,4 +82,26 @@ public class UserService {
                 .rating(user.getRating())
                 .build();
     }
+
+    public UserResponseDTO update(Long id, UserRequestDTO dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(dto.getPassword());
+        }
+
+        user.setRole(dto.getRole());
+
+        user.setInstagram(dto.getInstagram());
+        user.setFacebook(dto.getFacebook());
+        user.setWhatsapp(dto.getWhatsapp());
+
+        User updated = userRepository.save(user);
+
+        return mapToDTO(updated);
+    }
 }
